@@ -2,10 +2,14 @@ import styles from '../styles/Home.module.css'
 import React, { useEffect, useMemo } from 'react'
 import { useMediaStream } from '../lib/contexts/MediaStreamContext'
 import BoxScene from '../lib/scenes/BoxScene'
+import TextScene from '../lib/scenes/TextScene'
 import { useMidi } from '../lib/contexts/MidiContext'
 import { useStateStorage } from '../lib/state/stateStorage'
 import { SceneSelector } from '../lib/logic/SceneSelector'
-import { InnerTriangleScene } from '../lib/scenes/InnerTrianglesScene'
+import InnerTriangleScene from '../lib/scenes/InnerTrianglesScene'
+import SceneDropdown from '../lib/objects/utilities/SceneDropdown'
+import CircuitBoardScene from '../lib/scenes/CircuitBoardScene'
+import USBScene from '../lib/scenes/usbScene'
 
 const handleSelection = (inputs, setSelectedInput) => (event) => {
   setSelectedInput(inputs.find(input => input.name === event.target.value))
@@ -26,11 +30,8 @@ export default function Home() {
         <option key={input.name} value={input.name}>{input.name}</option>
       ))}
     </select>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   ) : null, [inputs, selectedInput])
-
-  useEffect(() => {
-    console.log(selectedInput)
-  }, [selectedInput])
 
   const toggleMic = () => stream ? stop() : start()
 
@@ -41,11 +42,15 @@ export default function Home() {
           {stream ? 'Close Microphone' : 'Open Microphone'}
         </button>
         {midiSelect}
+        <SceneDropdown />
       </div>
       <div className={styles.container}>
         <SceneSelector>
-          <BoxScene pulseBackground></BoxScene>
-          <InnerTriangleScene useOrtographic pulseBackground></InnerTriangleScene>
+          <USBScene />
+          <CircuitBoardScene />
+          <BoxScene pulseBackground />
+          <InnerTriangleScene useOrtographic pulseBackground />
+          <TextScene quantity={40} />
         </SceneSelector>
       </div>
     </>
