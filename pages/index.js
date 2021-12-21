@@ -1,19 +1,31 @@
 import styles from '../styles/Home.module.css'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useRef, useMemo } from 'react'
 import { useMediaStream } from '../lib/contexts/MediaStreamContext'
 import BoxScene from '../lib/scenes/BoxScene'
 import TextScene from '../lib/scenes/TextScene'
 import { useMidi } from '../lib/contexts/MidiContext'
 import { useStateStorage } from '../lib/state/stateStorage'
-import { SceneSelector } from '../lib/logic/SceneSelector'
+import { SceneSelector } from '../lib/objects/utilities/SceneSelector'
 import InnerTriangleScene from '../lib/scenes/InnerTrianglesScene'
 import SceneDropdown from '../lib/objects/utilities/SceneDropdown'
 import CircuitBoardScene from '../lib/scenes/CircuitBoardScene'
 import USBScene from '../lib/scenes/usbScene'
+import HexagonGridScene from '../lib/scenes/HexagonGridScene'
 
 const handleSelection = (inputs, setSelectedInput) => (event) => {
   setSelectedInput(inputs.find(input => input.name === event.target.value))
 }
+
+const useFirstMidi = (inputs) => {
+  const firstTime = useRef(true);
+  const firstRenderWithMidi = firstTime.current;
+  if (inputs.length > 0 && firstRenderWithMidi) {
+    firstTime.current = false;
+    return true;
+  }
+
+  return false;
+};
 
 export default function Home() {
   const { stream, start, stop } = useMediaStream()
@@ -33,6 +45,11 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ) : null, [inputs, selectedInput])
 
+  const firstTimeMidi = useFirstMidi(inputs)
+  if (firstTimeMidi) {
+    setSelectedInput(inputs[0])
+  }
+
   const toggleMic = () => stream ? stop() : start()
 
   return (
@@ -45,10 +62,11 @@ export default function Home() {
         <SceneDropdown />
       </div>
       <div className={styles.container}>
-        <SceneSelector>
+        <SceneSelector useOrtographic>
+          <BoxScene pulseBackground />
+          <HexagonGridScene pulseBackground />
           <USBScene />
           <CircuitBoardScene />
-          <BoxScene pulseBackground />
           <InnerTriangleScene useOrtographic pulseBackground />
           <TextScene quantity={40} />
         </SceneSelector>
