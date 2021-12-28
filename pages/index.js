@@ -6,11 +6,13 @@ import TextScene from '../lib/scenes/TextScene'
 import { useMidi } from '../lib/contexts/MidiContext'
 import { useStateStorage } from '../lib/state/stateStorage'
 import { SceneSelector } from '../lib/objects/utilities/SceneSelector'
-import InnerTriangleScene from '../lib/scenes/InnerTrianglesScene'
 import SceneDropdown from '../lib/objects/utilities/SceneDropdown'
 import CircuitBoardScene from '../lib/scenes/CircuitBoardScene'
 import USBScene from '../lib/scenes/usbScene'
 import HexagonGridScene from '../lib/scenes/HexagonGridScene'
+import InnerTriangleSceneOld from '../lib/scenes/_InnerTrianglesScene_old'
+import RotatingTrianglesScence from '../lib/scenes/RotatingTrianglesScene'
+import GameOfLifeScene from '../lib/scenes/GameOfLifeScene'
 
 const handleSelection = (inputs, setSelectedInput) => event => {
   setSelectedInput(inputs.find(input => input.name === event.target.value))
@@ -70,11 +72,13 @@ export default function Home() {
       </div>
       <div className={styles.container}>
         <SceneSelector useOrtographic>
-          <BoxScene pulseBackground />
-          <HexagonGridScene pulseBackground />
+          <RotatingTrianglesScence />
+          <GameOfLifeScene />
+          <BoxScene />
+          <HexagonGridScene />
+          <InnerTriangleSceneOld useOrtographic pulseBackground />
           <USBScene />
           <CircuitBoardScene />
-          <InnerTriangleScene useOrtographic pulseBackground />
           <TextScene quantity={40} />
         </SceneSelector>
       </div>
