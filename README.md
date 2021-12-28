@@ -1,34 +1,74 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+### Digital Utopia
 
-## Getting Started
+Digital Utopia is a project aimed on creating high-quality
+visuals that react to the beat and/or energy of a song. It is aimed
+to be used in parties, clubs and raves, and to be controllable via MIDI.
 
-First, run the development server:
+![An example of visuals](video-example.webp)
+
+⚠️ Very early work in progress!
+
+Currently, the only browser that will be aimed for full support is chrome/chromium.
+This is because it is the only one that implements webMIDI fully.
+
+### To develop
+
+with `npm` installed, run
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+and access port 3000 on your computer.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+This project heavily relies on [r3f](https://github.com/pmndrs/react-three-fiber)'s ecosystem, 
+so you could look there for help.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+the `index.js` contains a `SceneSelector`, in which you can plug your own scenes.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+An example scene that reacts to the beat looks like this:
 
-## Learn More
+```js
+import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { useBeatFrame } from '../hooks/useBeatFrame'
+import slew from '../logic/slew'
+import { AutomaticBeat } from '../objects/utilities/AutomaticBeat'
+import { OrbitControls } from '@react-three/drei'
 
-To learn more about Next.js, take a look at the following resources:
+export default function ExampleScene() {
+  const boxRef = useRef()
+  const beatFrame = useBeatFrame()
+  const slewerContext = slew({
+    slewGoingUp: false,
+    slewGoingDown: true,
+    defaultValue: 1,
+    slewFactor: 3
+  })
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  useFrame(() => {
+    const desiredScale = beatFrame() ? 3 : 1
+    const actualScale = slewerContext(desiredScale)
+    const { current: box } = boxRef
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+    box.scale.x = box.scale.y = box.scale.z = actualScale
+  })
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+  // Note: the AutomaticBeat is only there so that 
+  // something generates the beat signal. In a live context,
+  // other things could generate a beat signal, such as a MIDI clock (WIP)
+  // or a transient detector on the sound (not implemented yet)
+  return (
+    <>
+      <mesh
+        ref={boxRef} 
+      >
+        <boxGeometry args={[1, 1, 1]} />
+        <meshBasicMaterial attach="material" color="#f3f3f3" wireframe />
+      </mesh>
+      <OrbitControls />
+      <AutomaticBeat bpm={110} />
+    </>
+  )
+}
+```
